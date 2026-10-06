@@ -5,7 +5,7 @@ namespace PaymentService.Core.Domain;
 /// Only a fixed list is supported so a typo like "USX" can never reach a bank.
 /// In production this list would come from reference data.
 /// </summary>
-public sealed class Currency
+public sealed record Currency
 {
     private static readonly Dictionary<string, Currency> Supported = new()
     {

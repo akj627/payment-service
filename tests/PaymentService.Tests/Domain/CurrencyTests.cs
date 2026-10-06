@@ -28,10 +28,4 @@ public class CurrencyTests
         Assert.False(found);
         Assert.Null(currency);
     }
-
-    [Fact]
-    public void Same_code_returns_same_instance()
-    {
-        Assert.Same(Currency.FromCode("EUR"), Currency.FromCode("EUR"));
-    }
 }

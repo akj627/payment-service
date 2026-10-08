@@ -3,12 +3,12 @@ namespace PaymentService.Core.Domain;
 /// <summary>
 /// One status change of a payment. Only ever added, never updated or deleted,
 /// and saved in the same transaction as the change itself.
+/// The Id is assigned by the database in insert order, which gives the audit trail its order.
 /// </summary>
 public class AuditEvent
 {
     public AuditEvent(Guid batchId, Guid paymentId, PaymentStatus? fromStatus, PaymentStatus toStatus, string? note, DateTimeOffset occurredAt)
     {
-        Id = Guid.NewGuid();
         BatchId = batchId;
         PaymentId = paymentId;
         FromStatus = fromStatus;
@@ -17,7 +17,7 @@ public class AuditEvent
         OccurredAt = occurredAt;
     }
 
-    public Guid Id { get; private set; }
+    public long Id { get; private set; }
 
     public Guid BatchId { get; private set; }
 

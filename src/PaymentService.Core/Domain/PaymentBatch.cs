@@ -8,6 +8,13 @@ public class PaymentBatch
 {
     private readonly List<Payment> _payments = new();
 
+    // Used by EF Core when loading from the database.
+#pragma warning disable CS8618
+    private PaymentBatch()
+    {
+    }
+#pragma warning restore CS8618
+
     public PaymentBatch(string idempotencyKey, IReadOnlyList<NewPayment> payments, DateTimeOffset now)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(idempotencyKey);

@@ -11,6 +11,13 @@ public class Payment
     private readonly List<AuditEvent> _auditEvents = new();
     private StateMachine<PaymentStatus, PaymentTrigger>? _stateMachine;
 
+    // Used by EF Core when loading from the database.
+#pragma warning disable CS8618
+    private Payment()
+    {
+    }
+#pragma warning restore CS8618
+
     public Payment(Guid batchId, NewPayment details, DateTimeOffset now)
     {
         ArgumentNullException.ThrowIfNull(details);

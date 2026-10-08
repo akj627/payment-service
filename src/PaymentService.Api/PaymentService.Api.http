@@ -42,16 +42,16 @@ Idempotency-Key: batch-2026-10-07-002
 ### Wait a few seconds, then GET the batch: Submitted, Failed, Submitted after a lost reply, NeedsReview after 3 attempts
 POST {{host}}/batches
 Content-Type: application/json
-Idempotency-Key: batch-2026-10-07-003
+Idempotency-Key: batch-2026-10-07-005
 
 {
   "payments": [
-    { "reference": "INV-2001", "amount": "100.00", "currency": "USD", "beneficiaryName": "Accepts Ltd",   "beneficiaryAccount": "GB29NWBK60161331926819",   "bankPartner": "BANK-A" },
-    { "reference": "INV-2002", "amount": "200.00", "currency": "USD", "beneficiaryName": "Closed Co",     "beneficiaryAccount": "GB00ACCOUNT-REJECT",       "bankPartner": "BANK-A" },
-    { "reference": "INV-2003", "amount": "300.00", "currency": "USD", "beneficiaryName": "Lost Reply Inc","beneficiaryAccount": "GB00ACCOUNT-LOSTREPLY",    "bankPartner": "BANK-B" },
-    { "reference": "INV-2004", "amount": "400.00", "currency": "USD", "beneficiaryName": "Silent Bank Co","beneficiaryAccount": "GB00ACCOUNT-TIMEOUT",      "bankPartner": "BANK-B" }
+    { "reference": "INV-3001", "amount": "100.00", "currency": "USD", "beneficiaryName": "Accepts Ltd",   "beneficiaryAccount": "GB29NWBK60161331926819",   "bankPartner": "BANK-A" },
+    { "reference": "INV-3002", "amount": "200.00", "currency": "USD", "beneficiaryName": "Closed Co",     "beneficiaryAccount": "GB00ACCOUNT-REJECT",       "bankPartner": "BANK-A" },
+    { "reference": "INV-3003", "amount": "300.00", "currency": "USD", "beneficiaryName": "Lost Reply Inc","beneficiaryAccount": "GB00ACCOUNT-LOSTREPLY",    "bankPartner": "BANK-B" },
+    { "reference": "INV-3004", "amount": "400.00", "currency": "USD", "beneficiaryName": "Silent Bank Co","beneficiaryAccount": "GB00ACCOUNT-TIMEOUT",      "bankPartner": "BANK-B" }
   ]
 }
 
 ### Get a batch (paste the id from the first response)
-GET {{host}}/batches/00000000-0000-0000-0000-000000000000
+GET {{host}}/batches/7c3eeadb-2372-419d-afb8-c4c07efa1a4f000000000000

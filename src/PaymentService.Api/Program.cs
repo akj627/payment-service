@@ -14,6 +14,8 @@ builder.Services.AddScoped<BatchSubmissionService>();
 builder.Services.AddScoped<PaymentDispatcher>();
 builder.Services.AddHostedService<DispatchWorker>();
 builder.Services.AddProblemDetails();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
@@ -26,6 +28,12 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseExceptionHandler();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.MapGet("/", () => "Payment Batch Service");
 app.MapBatchEndpoints();

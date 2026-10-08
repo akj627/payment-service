@@ -10,8 +10,18 @@ public static class BatchEndpoints
 
     public static void MapBatchEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/batches", SubmitBatch);
-        app.MapGet("/batches/{id:guid}", GetBatch).WithName(nameof(GetBatch));
+        app.MapPost("/batches", SubmitBatch)
+            .WithSummary("Submit a batch of payments")
+            .WithDescription("Send the same Idempotency-Key again to get the original batch back (200) instead of a new one.")
+            .Produces<BatchResponse>(StatusCodes.Status201Created)
+            .Produces<BatchResponse>(StatusCodes.Status200OK)
+            .ProducesValidationProblem();
+
+        app.MapGet("/batches/{id:guid}", GetBatch)
+            .WithName(nameof(GetBatch))
+            .WithSummary("Get a batch with its payments and audit trail")
+            .Produces<BatchResponse>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
     }
 
     private static async Task<IResult> SubmitBatch(

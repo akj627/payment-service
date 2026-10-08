@@ -53,18 +53,308 @@ To start with an empty database, stop the app and delete `src/PaymentService.Api
 
 ## Try it
 
-1. Send **"Batch showing every outcome"** from the `.http` file (or paste its body into Swagger, with any `Idempotency-Key`).
-2. Copy the `id` from the 201 response and call `GET /batches/{id}`.
-3. Call it again about 10 seconds later. The four payments end up:
+A real run on my machine, using **"Batch showing every outcome"** from the `.http` file. The simulated bank decides each payment's outcome from the end of the beneficiary account number.
+
+**1. Submit the batch: `POST /batches`** with an `Idempotency-Key` header. It returns **201**, with every payment Pending.
+
+![POST /batches in Swagger](docs/images/PostBatches.png)
+
+<details>
+<summary>Full POST response (201): batch <code>Processing</code>, all four payments Pending</summary>
+
+```json
+{
+  "id": "053b4ffd-2847-4812-8793-bd6637dc3af1",
+  "status": "Processing",
+  "payments": [
+    {
+      "id": "9b225d87-3f4f-4321-aa4a-197c2a765be2",
+      "reference": "INV-3001",
+      "amount": "100.00",
+      "currency": "USD",
+      "beneficiaryName": "Accepts Ltd",
+      "bankPartner": "BANK-A",
+      "status": "Pending",
+      "attempts": 0,
+      "bankReference": null,
+      "failureReason": null
+    },
+    {
+      "id": "ca02e09a-dbd1-4314-8bfe-5d9012fdc503",
+      "reference": "INV-3002",
+      "amount": "200.00",
+      "currency": "USD",
+      "beneficiaryName": "Closed Co",
+      "bankPartner": "BANK-A",
+      "status": "Pending",
+      "attempts": 0,
+      "bankReference": null,
+      "failureReason": null
+    },
+    {
+      "id": "7709ed31-e0c6-4cf4-b907-a1e577c7bad7",
+      "reference": "INV-3003",
+      "amount": "300.00",
+      "currency": "USD",
+      "beneficiaryName": "Lost Reply Inc",
+      "bankPartner": "BANK-B",
+      "status": "Pending",
+      "attempts": 0,
+      "bankReference": null,
+      "failureReason": null
+    },
+    {
+      "id": "6aa2b46b-dd22-462b-a6f1-a2fd54308458",
+      "reference": "INV-3004",
+      "amount": "400.00",
+      "currency": "USD",
+      "beneficiaryName": "Silent Bank Co",
+      "bankPartner": "BANK-B",
+      "status": "Pending",
+      "attempts": 0,
+      "bankReference": null,
+      "failureReason": null
+    }
+  ],
+  "auditTrail": [
+    {
+      "paymentId": "9b225d87-3f4f-4321-aa4a-197c2a765be2",
+      "fromStatus": null,
+      "toStatus": "Pending",
+      "note": null,
+      "occurredAt": "2026-10-08T16:22:40.3802+00:00"
+    },
+    {
+      "paymentId": "ca02e09a-dbd1-4314-8bfe-5d9012fdc503",
+      "fromStatus": null,
+      "toStatus": "Pending",
+      "note": null,
+      "occurredAt": "2026-10-08T16:22:40.3802+00:00"
+    },
+    {
+      "paymentId": "7709ed31-e0c6-4cf4-b907-a1e577c7bad7",
+      "fromStatus": null,
+      "toStatus": "Pending",
+      "note": null,
+      "occurredAt": "2026-10-08T16:22:40.3802+00:00"
+    },
+    {
+      "paymentId": "6aa2b46b-dd22-462b-a6f1-a2fd54308458",
+      "fromStatus": null,
+      "toStatus": "Pending",
+      "note": null,
+      "occurredAt": "2026-10-08T16:22:40.3802+00:00"
+    }
+  ]
+}
+```
+
+</details>
+
+**2. Check the batch: `GET /batches/{id}`** using the `id` from the 201 response, about 10 seconds later.
+
+![GET /batches/{id} in Swagger](docs/images/GetBatch.png)
+
+<details>
+<summary>Full GET response (200): batch <code>CompletedWithFailures</code>, all four payments and the audit trail</summary>
+
+```json
+{
+  "id": "053b4ffd-2847-4812-8793-bd6637dc3af1",
+  "status": "CompletedWithFailures",
+  "payments": [
+    {
+      "id": "9b225d87-3f4f-4321-aa4a-197c2a765be2",
+      "reference": "INV-3001",
+      "amount": "100.00",
+      "currency": "USD",
+      "beneficiaryName": "Accepts Ltd",
+      "bankPartner": "BANK-A",
+      "status": "Submitted",
+      "attempts": 1,
+      "bankReference": "BANK-A-9ED8C97CA1",
+      "failureReason": null
+    },
+    {
+      "id": "ca02e09a-dbd1-4314-8bfe-5d9012fdc503",
+      "reference": "INV-3002",
+      "amount": "200.00",
+      "currency": "USD",
+      "beneficiaryName": "Closed Co",
+      "bankPartner": "BANK-A",
+      "status": "Failed",
+      "attempts": 1,
+      "bankReference": null,
+      "failureReason": "Beneficiary account is closed."
+    },
+    {
+      "id": "7709ed31-e0c6-4cf4-b907-a1e577c7bad7",
+      "reference": "INV-3003",
+      "amount": "300.00",
+      "currency": "USD",
+      "beneficiaryName": "Lost Reply Inc",
+      "bankPartner": "BANK-B",
+      "status": "Submitted",
+      "attempts": 2,
+      "bankReference": "BANK-B-F95770CBE0",
+      "failureReason": null
+    },
+    {
+      "id": "6aa2b46b-dd22-462b-a6f1-a2fd54308458",
+      "reference": "INV-3004",
+      "amount": "400.00",
+      "currency": "USD",
+      "beneficiaryName": "Silent Bank Co",
+      "bankPartner": "BANK-B",
+      "status": "NeedsReview",
+      "attempts": 3,
+      "bankReference": null,
+      "failureReason": "No reliable response from bank: Bank did not respond. (gave up after 3 attempts)"
+    }
+  ],
+  "auditTrail": [
+    {
+      "paymentId": "9b225d87-3f4f-4321-aa4a-197c2a765be2",
+      "fromStatus": null,
+      "toStatus": "Pending",
+      "note": null,
+      "occurredAt": "2026-10-08T16:22:40.3802+00:00"
+    },
+    {
+      "paymentId": "ca02e09a-dbd1-4314-8bfe-5d9012fdc503",
+      "fromStatus": null,
+      "toStatus": "Pending",
+      "note": null,
+      "occurredAt": "2026-10-08T16:22:40.3802+00:00"
+    },
+    {
+      "paymentId": "7709ed31-e0c6-4cf4-b907-a1e577c7bad7",
+      "fromStatus": null,
+      "toStatus": "Pending",
+      "note": null,
+      "occurredAt": "2026-10-08T16:22:40.3802+00:00"
+    },
+    {
+      "paymentId": "6aa2b46b-dd22-462b-a6f1-a2fd54308458",
+      "fromStatus": null,
+      "toStatus": "Pending",
+      "note": null,
+      "occurredAt": "2026-10-08T16:22:40.3802+00:00"
+    },
+    {
+      "paymentId": "6aa2b46b-dd22-462b-a6f1-a2fd54308458",
+      "fromStatus": "Pending",
+      "toStatus": "Dispatching",
+      "note": "Attempt 1",
+      "occurredAt": "2026-10-08T16:22:42.2672+00:00"
+    },
+    {
+      "paymentId": "6aa2b46b-dd22-462b-a6f1-a2fd54308458",
+      "fromStatus": "Dispatching",
+      "toStatus": "Pending",
+      "note": "No reliable response from bank: Bank did not respond.",
+      "occurredAt": "2026-10-08T16:22:42.5107+00:00"
+    },
+    {
+      "paymentId": "7709ed31-e0c6-4cf4-b907-a1e577c7bad7",
+      "fromStatus": "Pending",
+      "toStatus": "Dispatching",
+      "note": "Attempt 1",
+      "occurredAt": "2026-10-08T16:22:42.5169+00:00"
+    },
+    {
+      "paymentId": "7709ed31-e0c6-4cf4-b907-a1e577c7bad7",
+      "fromStatus": "Dispatching",
+      "toStatus": "Pending",
+      "note": "No reliable response from bank: Bank accepted the payment but the reply was lost.",
+      "occurredAt": "2026-10-08T16:22:42.7298+00:00"
+    },
+    {
+      "paymentId": "9b225d87-3f4f-4321-aa4a-197c2a765be2",
+      "fromStatus": "Pending",
+      "toStatus": "Dispatching",
+      "note": "Attempt 1",
+      "occurredAt": "2026-10-08T16:22:42.7341+00:00"
+    },
+    {
+      "paymentId": "9b225d87-3f4f-4321-aa4a-197c2a765be2",
+      "fromStatus": "Dispatching",
+      "toStatus": "Submitted",
+      "note": "Bank reference BANK-A-9ED8C97CA1",
+      "occurredAt": "2026-10-08T16:22:42.9466+00:00"
+    },
+    {
+      "paymentId": "ca02e09a-dbd1-4314-8bfe-5d9012fdc503",
+      "fromStatus": "Pending",
+      "toStatus": "Dispatching",
+      "note": "Attempt 1",
+      "occurredAt": "2026-10-08T16:22:42.951+00:00"
+    },
+    {
+      "paymentId": "ca02e09a-dbd1-4314-8bfe-5d9012fdc503",
+      "fromStatus": "Dispatching",
+      "toStatus": "Failed",
+      "note": "Beneficiary account is closed.",
+      "occurredAt": "2026-10-08T16:22:43.1625+00:00"
+    },
+    {
+      "paymentId": "6aa2b46b-dd22-462b-a6f1-a2fd54308458",
+      "fromStatus": "Pending",
+      "toStatus": "Dispatching",
+      "note": "Attempt 2",
+      "occurredAt": "2026-10-08T16:22:44.2536+00:00"
+    },
+    {
+      "paymentId": "6aa2b46b-dd22-462b-a6f1-a2fd54308458",
+      "fromStatus": "Dispatching",
+      "toStatus": "Pending",
+      "note": "No reliable response from bank: Bank did not respond.",
+      "occurredAt": "2026-10-08T16:22:44.46+00:00"
+    },
+    {
+      "paymentId": "7709ed31-e0c6-4cf4-b907-a1e577c7bad7",
+      "fromStatus": "Pending",
+      "toStatus": "Dispatching",
+      "note": "Attempt 2",
+      "occurredAt": "2026-10-08T16:22:44.4637+00:00"
+    },
+    {
+      "paymentId": "7709ed31-e0c6-4cf4-b907-a1e577c7bad7",
+      "fromStatus": "Dispatching",
+      "toStatus": "Submitted",
+      "note": "Bank reference BANK-B-F95770CBE0",
+      "occurredAt": "2026-10-08T16:22:44.6632+00:00"
+    },
+    {
+      "paymentId": "6aa2b46b-dd22-462b-a6f1-a2fd54308458",
+      "fromStatus": "Pending",
+      "toStatus": "Dispatching",
+      "note": "Attempt 3",
+      "occurredAt": "2026-10-08T16:22:46.268+00:00"
+    },
+    {
+      "paymentId": "6aa2b46b-dd22-462b-a6f1-a2fd54308458",
+      "fromStatus": "Dispatching",
+      "toStatus": "NeedsReview",
+      "note": "No reliable response from bank: Bank did not respond. (gave up after 3 attempts)",
+      "occurredAt": "2026-10-08T16:22:46.476+00:00"
+    }
+  ]
+}
+```
+
+</details>
+
+**3. What happened to each payment**
 
 | Payment | Beneficiary account ends in | Simulated bank | Final status |
 |---|---|---|---|
-| INV-2001 | (anything else) | accepts | **Submitted** |
-| INV-2002 | `REJECT` | rejects | **Failed** |
-| INV-2003 | `LOSTREPLY` | accepts but the reply is lost | **Submitted** after a safe retry (executed once) |
-| INV-2004 | `TIMEOUT` | never answers | **NeedsReview** after 3 attempts |
+| INV-3001 | (anything else) | accepts | **Submitted** |
+| INV-3002 | `REJECT` | rejects | **Failed** |
+| INV-3003 | `LOSTREPLY` | accepts but the reply is lost | **Submitted** after a safe retry (executed once) |
+| INV-3004 | `TIMEOUT` | never answers | **NeedsReview** after 3 attempts |
 
-The `auditTrail` in the response shows every status change with its reason. Sending the same request again with the same `Idempotency-Key` returns the original batch (200) instead of creating a new one.
+The `auditTrail` shows every status change with its reason. Sending the same request again with the same `Idempotency-Key` returns the original batch (200) instead of creating a new one.
 
 ## API
 

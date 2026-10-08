@@ -12,7 +12,7 @@ I used AI (Claude) as an assisting tool, a helping hand alongside me. **I set ho
 **How I directed the planning**
 - I asked for a plan before any code was written, and for the brief to be followed exactly.
 - I had the work broken into Jira-style stories ([BACKLOG.md](docs/BACKLOG.md)), each built, tested and committed on its own, so the git history follows the backlog one story at a time.
-- I cut the scope to fit the 4–6 hour guideline, with the rest documented as numbered future work.
+- I cut the scope to fit the 4-6 hour guideline, with the rest documented as numbered future work.
 - I asked for the code to stay simple and minimal, with no shortcuts and no speculative fields.
 - The backlog shows where my decisions changed the plan: **PAY-16 (Stateless NuGet package)** and **PAY-17 (Swagger)** have higher numbers because I added them mid-sprint.
 
@@ -101,7 +101,7 @@ dotnet test
 - A single instance runs at a time. The SQLite file is local to the process, and dispatch assumes one worker.
 - No authentication (see the architecture doc for how it would be added).
 - All times are UTC. Payments are sent as soon as they are accepted (no cut-off times or future dates).
-- A batch holds 1–1,000 payments and is accepted whole or not at all.
+- A batch holds 1-1,000 payments and is accepted whole or not at all.
 - Supported currencies: USD, EUR, GBP, CHF, CAD, SGD, INR, JPY, BHD.
 - **Submitted** means the bank accepted the instruction, not that the money has settled.
 - The simulated bank remembers idempotency keys in memory only, so it resets on restart.

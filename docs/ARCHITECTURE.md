@@ -1,10 +1,8 @@
-# Payment Batch Service — Architecture
+# Payment Batch Service: Architecture
 
 This document explains what the service does, how it is built, the decisions behind it, and what it would take to run it in production on Azure. It is written for an engineer who has not seen the code and wants to start contributing.
 
 Related: [README](../README.md) (build, run, test) · [Backlog](BACKLOG.md) (delivered and future work items)
-
----
 
 ## 1. The problem
 
@@ -22,7 +20,7 @@ Three things are non-negotiable:
 
 ## 2. Scope
 
-The brief asks for a meaningful slice in 4–6 hours. I chose a slice that runs **end to end** and covers the hard correctness problems, and documented the rest.
+The brief asks for a meaningful slice in 4-6 hours. I chose a slice that runs **end to end** and covers the hard correctness problems, and documented the rest.
 
 **Built**
 - Idempotent batch submission over HTTP with whole-batch validation, and exact money handling.
@@ -30,7 +28,7 @@ The brief asks for a meaningful slice in 4–6 hours. I chose a slice that runs 
 - A background dispatcher that sends payments to a simulated bank, retries safely and escalates unknown outcomes.
 - Batch status and audit trail over HTTP, Swagger, and 60 automated tests.
 
-**Not built (see [Backlog](BACKLOG.md))** — authentication, multiple workers, real bank formats, settlement tracking, an operations UI, sanctions screening, Azure deployment and more. Each is listed with the reason it matters and roughly when it should be done.
+**Not built (see [Backlog](BACKLOG.md)):** authentication, multiple workers, real bank formats, settlement tracking, an operations UI, sanctions screening, Azure deployment and more. Each is listed with the reason it matters and roughly when it should be done.
 
 ## 3. System overview
 
@@ -137,7 +135,7 @@ Anything not permitted throws a `DomainException` and writes no audit event.
 - **Decision.** All problems are reported at once (`payments[3].amount`) and nothing is saved if anything is wrong, because accepting half a payroll creates a reconciliation problem.
 - **Trade-off.** One bad row blocks the batch; failures *after* acceptance are handled per payment.
 
-### ADR-5: Safe dispatch — save first, and a timeout is never a failure
+### ADR-5: Safe dispatch: save first, and a timeout is never a failure
 - **Decision.** Save Dispatching before calling the bank. Rejection → Failed. Timeout → retry with the same idempotency key, then NeedsReview after 3 attempts, because we don't know whether the money moved and Failed would invite a duplicate resubmission.
 - **Trade-off.** No backoff (PAY-27); a crash leaves a payment in Dispatching until leases exist (PAY-18).
 

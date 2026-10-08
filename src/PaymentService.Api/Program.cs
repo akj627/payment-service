@@ -1,6 +1,8 @@
 using System.Text.Json.Serialization;
 using PaymentService.Api.Batches;
+using PaymentService.Api.Dispatch;
 using PaymentService.Core.Batches;
+using PaymentService.Core.Dispatch;
 using PaymentService.Infrastructure;
 using PaymentService.Infrastructure.Persistence;
 
@@ -9,6 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("Payments")!);
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<BatchSubmissionService>();
+builder.Services.AddScoped<PaymentDispatcher>();
+builder.Services.AddHostedService<DispatchWorker>();
 builder.Services.AddProblemDetails();
 builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));

@@ -29,13 +29,13 @@ public class PaymentBatchRepository(PaymentsDbContext db) : IPaymentBatchReposit
 
     public Task<PaymentBatch?> GetAsync(Guid batchId, CancellationToken cancellationToken = default) =>
         db.Batches
-            .Include(b => b.Payments)
+            .Include(b => b.Payments.OrderBy(p => p.Reference))
             .AsNoTracking()
             .FirstOrDefaultAsync(b => b.Id == batchId, cancellationToken);
 
     public Task<PaymentBatch?> FindByIdempotencyKeyAsync(string idempotencyKey, CancellationToken cancellationToken = default) =>
         db.Batches
-            .Include(b => b.Payments)
+            .Include(b => b.Payments.OrderBy(p => p.Reference))
             .AsNoTracking()
             .FirstOrDefaultAsync(b => b.IdempotencyKey == idempotencyKey, cancellationToken);
 

@@ -38,5 +38,20 @@ Idempotency-Key: batch-2026-10-07-002
   ]
 }
 
+### Batch showing every outcome (the simulated bank decides by the end of the account number)
+### Wait a few seconds, then GET the batch: Submitted, Failed, Submitted after a lost reply, NeedsReview after 3 attempts
+POST {{host}}/batches
+Content-Type: application/json
+Idempotency-Key: batch-2026-10-07-003
+
+{
+  "payments": [
+    { "reference": "INV-2001", "amount": "100.00", "currency": "USD", "beneficiaryName": "Accepts Ltd",   "beneficiaryAccount": "GB29NWBK60161331926819",   "bankPartner": "BANK-A" },
+    { "reference": "INV-2002", "amount": "200.00", "currency": "USD", "beneficiaryName": "Closed Co",     "beneficiaryAccount": "GB00ACCOUNT-REJECT",       "bankPartner": "BANK-A" },
+    { "reference": "INV-2003", "amount": "300.00", "currency": "USD", "beneficiaryName": "Lost Reply Inc","beneficiaryAccount": "GB00ACCOUNT-LOSTREPLY",    "bankPartner": "BANK-B" },
+    { "reference": "INV-2004", "amount": "400.00", "currency": "USD", "beneficiaryName": "Silent Bank Co","beneficiaryAccount": "GB00ACCOUNT-TIMEOUT",      "bankPartner": "BANK-B" }
+  ]
+}
+
 ### Get a batch (paste the id from the first response)
-GET {{host}}/batches/a2801ea9-3ca9-4254-9936-8508f678c3e3
+GET {{host}}/batches/00000000-0000-0000-0000-000000000000

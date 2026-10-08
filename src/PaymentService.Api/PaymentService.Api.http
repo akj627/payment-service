@@ -1,0 +1,42 @@
+@host = http://localhost:5238
+
+### Submit a batch (send it twice: the second call returns the same batch with 200, not a new one)
+POST {{host}}/batches
+Content-Type: application/json
+Idempotency-Key: batch-2026-10-07-001
+
+{
+  "payments": [
+    {
+      "reference": "INV-1001",
+      "amount": "1250.50",
+      "currency": "USD",
+      "beneficiaryName": "Acme Supplies Ltd",
+      "beneficiaryAccount": "GB29NWBK60161331926819",
+      "bankPartner": "BANK-A"
+    },
+    {
+      "reference": "INV-1002",
+      "amount": "980",
+      "currency": "EUR",
+      "beneficiaryName": "Globex GmbH",
+      "beneficiaryAccount": "DE89370400440532013000",
+      "bankPartner": "BANK-B"
+    }
+  ]
+}
+
+### Invalid batch: every problem is reported, nothing is saved
+POST {{host}}/batches
+Content-Type: application/json
+Idempotency-Key: batch-2026-10-07-002
+
+{
+  "payments": [
+    { "reference": "INV-1", "amount": "10.005", "currency": "USD", "beneficiaryName": "Acme", "beneficiaryAccount": "123", "bankPartner": "BANK-A" },
+    { "reference": "INV-1", "amount": "5", "currency": "USX", "beneficiaryName": "", "beneficiaryAccount": "123", "bankPartner": "BANK-A" }
+  ]
+}
+
+### Get a batch (paste the id from the first response)
+GET {{host}}/batches/a2801ea9-3ca9-4254-9936-8508f678c3e3

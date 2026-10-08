@@ -5,6 +5,36 @@ Accepts batches of outbound payments from corporate treasury teams, validates th
 - **Design and decisions:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - **Work items delivered and future work:** [docs/BACKLOG.md](docs/BACKLOG.md)
 
+## How I used AI
+
+I used AI (Claude) as an assisting tool, a helping hand alongside me. **I set how the work was planned and run, and the design decisions and trade-offs are mine.**
+
+**How I directed the planning**
+- I asked for a plan before any code was written, and for the brief to be followed exactly.
+- I had the work broken into Jira-style stories ([BACKLOG.md](docs/BACKLOG.md)), each built, tested and committed on its own, so the git history follows the backlog one story at a time.
+- I cut the scope to fit the 4–6 hour guideline, with the rest documented as numbered future work.
+- I asked for the code to stay simple and minimal, with no shortcuts and no speculative fields.
+- The backlog shows where my decisions changed the plan: **PAY-16 (Stateless NuGet package)** and **PAY-17 (Swagger)** have higher numbers because I added them mid-sprint.
+
+**How the AI helped**
+- For each story, Claude drafted the code, tests or docs, and laid out options with their trade-offs when there was a choice to make.
+- I reviewed every draft, chose or overruled the options, ran the tests and made each commit myself.
+
+**Decisions I made**
+- **Stateless NuGet package for the payment state machine** (PAY-16). I have used it before. Claude's first draft used hand-written transition checks without a state machine concept.
+- **EF Core** for persistence, and **`Currency` as a record** so both value types follow one rule.
+- **Minimal domain models.** I pushed back twice on over-modelling, and removed fields that nothing used yet. A field is added in the commit that first needs it.
+- **HTTP intake now, file drop documented.**
+- **The worker stays in the API process.** I made this call knowing the trade-off with SQLite being a single physical file; it is written up as ADR-7.
+- I raised **event-driven processing** and a **separate worker service** as design questions; both are documented as the production path.
+- I asked for **Swagger** (PAY-17), and decided an **operations UI** (status dashboard and search) belongs in future work rather than in this slice.
+- An idempotency key enforced by a unique index. So, even if payment details are different and idempotency keys match, the payment will not be tried.
+
+**Options Claude proposed that I reviewed and accepted**
+- Whole-batch validation.
+- Timeout → retry with the same key → NeedsReview (never Failed).
+- SQLite for zero-setup runs, with in-memory SQLite for tests.
+
 ## Run it
 
 Requires the **.NET 10 SDK**. No database or other services to install: the app creates a SQLite file (`payments.db`) on first run.
@@ -61,7 +91,7 @@ dotnet test
 
 | Project | Contents |
 |---|---|
-| `src/PaymentService.Core` | Domain model, state machine (Stateless), validation, submission and dispatch logic, interfaces |
+| `src/PaymentService.Core` | Domain model, state machine (Stateless NuGet package), validation, submission and dispatch logic, interfaces |
 | `src/PaymentService.Infrastructure` | EF Core + SQLite repositories, simulated bank |
 | `src/PaymentService.Api` | Minimal API endpoints, background dispatch worker, Swagger |
 | `tests/PaymentService.Tests` | xUnit tests |
@@ -76,6 +106,3 @@ dotnet test
 - **Submitted** means the bank accepted the instruction, not that the money has settled.
 - The simulated bank remembers idempotency keys in memory only, so it resets on restart.
 
-## Use of AI
-
-I used Claude as a pair programmer for scaffolding, test cases and reviewing the documentation. The design decisions, scope and trade-offs are mine, and I reviewed and adjusted all generated code.
